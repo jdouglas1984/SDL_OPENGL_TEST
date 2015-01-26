@@ -8,8 +8,36 @@
 
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_log.h>
+#include <OpenGL/gl3.h>
 
 using namespace std;
+
+int EventFilter(void* userdata, SDL_Event* event)
+{
+    switch (event->type)
+    {
+        case SDL_KEYDOWN:
+            SDL_Log("key down %d", event->key.keysym.sym);
+            return 0;
+        case SDL_KEYUP:
+            SDL_Log("key up %d", event->key.keysym.sym);
+            return 0;
+        case SDL_MOUSEMOTION:
+            SDL_Log("mouse moved X = %d, Y = %d, RelativeX = %d, RelativeY = %d", event->motion.x, event->motion.y, event->motion.xrel, event->motion.yrel);
+            return 0;
+        case SDL_MOUSEBUTTONDOWN:
+            SDL_Log("mouse button down %d", event->button.button);
+            return 0;
+        case SDL_MOUSEBUTTONUP:
+            SDL_Log("mouse button up %d", event->button.button);
+            return 0;
+        case SDL_MOUSEWHEEL:
+            SDL_Log("mouse wheel");
+            return 0;
+    }
+    return 1;
+}
 
 int main(int argc, const char * argv[])
 {
@@ -39,6 +67,10 @@ int main(int argc, const char * argv[])
         return 0;
     }
     
+    auto glContext = SDL_GL_CreateContext(window);
+    
+    SDL_AddEventWatch(EventFilter, nullptr);
+    
     SDL_Event event;
     
     bool done = false;
@@ -54,11 +86,12 @@ int main(int argc, const char * argv[])
                     done = true;
                     break;
                 case SDL_APP_LOWMEMORY:
-                    cout << "Low Memory" << endl;
+                    SDL_Log("Low memory");
                     break;
             }
         }
     }
+    SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
